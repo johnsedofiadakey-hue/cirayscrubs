@@ -1,0 +1,38 @@
+'use client';
+import Link from 'next/link';
+import {useEffect,useState} from 'react';
+import {imageUrl,loadCatalogBundle,loadCollection,loadColors,loadContent} from '@/lib/api';
+import {collectionMembers,sortProducts} from '@/lib/merchandising';
+import {useMarket} from '@/lib/market';
+import type {CatalogBundle,CatalogEntry,FxRates,HomeContent,HomeSection,Market,StoreColor} from '@/lib/types';
+import {ProductCard} from './product-card';
+import {StoreLayout} from './store-layout';
+
+type Media={src:string;alt:string};type Cta={label:string;href:string};
+type Rail=HomeSection&{heading:string;source:{kind:'filter'|'handles'|'collection'|'personalized';handles?:string[];collectionId?:string;fallbackCollectionId?:string;department?:string;productType?:string;sort?:string;limit?:number};cta?:Cta};
+function ProductRail({section,bundle,market,fx}:{section:Rail;bundle:CatalogBundle;market?:Market;fx:FxRates|null}){
+  const[products,setProducts]=useState<CatalogEntry[]>([]);
+  useEffect(()=>{let live=true;const source=section.source;const task=async()=>{
+    if(source.kind==='handles')return source.handles?.map(h=>bundle.entries.find(e=>e.handle===h)).filter((e):e is CatalogEntry=>!!e)||[];
+    if(source.kind==='filter')return sortProducts(bundle.entries.filter(e=>(!source.department||e.department===source.department)&&(!source.productType||e.productType===source.productType)),source.sort||'featured',bundle);
+    const handle=source.kind==='collection'?source.collectionId:source.fallbackCollectionId;
+    const collection=handle?await loadCollection(handle):null;const fallback=collection?sortProducts(collectionMembers(collection,bundle),collection.defaultSort,bundle,collection.source.kind==='manual'?collection.source.handles:undefined):[];
+    if(source.kind!=='personalized')return fallback;
+    try{const recent=JSON.parse(localStorage.getItem('ciray_recent_v1')||'[]') as string[];const picks=recent.map(h=>bundle.entries.find(e=>e.handle===h)).filter((e):e is CatalogEntry=>!!e);return [...picks,...fallback.filter(e=>!picks.some(p=>p.handle===e.handle))]}catch{return fallback}
+  };void task().then(result=>{if(live)setProducts(result.slice(0,source.limit||12))}).catch(()=>{if(live)setProducts([])});return()=>{live=false}},[section,bundle]);
+  if(!products.length)return null;
+  return <section className="section-pad featured-section"><div className="section-head"><div><span className="eyebrow">Everyday essentials</span><h2 className="section-title">{section.heading}</h2></div>{section.cta&&<Link className="text-arrow" href={section.cta.href}>{section.cta.label} →</Link>}</div><div className="product-grid">{products.map(p=><ProductCard item={p} bundle={bundle} market={market} fx={fx} key={p.handle}/>)}</div></section>
+}
+function ColorList({section,colors}:{section:HomeSection;colors:StoreColor[]}){const s=section as HomeSection&{style:'swatches'|'marquee';heading?:string;body?:string;group?:string;hrefTemplate:string;limit:number;cta?:Cta};const shown=colors.filter(c=>!s.group||c.group===s.group).slice(0,s.limit);if(!shown.length)return null;return <section className="color-section section-pad"><div className="section-head"><div><span className="eyebrow">Shop by color</span><h2 className="section-title">{s.heading||'Find your shade'}</h2>{s.body&&<p>{s.body}</p>}</div>{s.cta&&<Link className="text-arrow" href={s.cta.href}>{s.cta.label} →</Link>}</div><div className={`color-list ${s.style}`}>{shown.map(c=><Link key={c.id} href={s.hrefTemplate.replace('{color}',encodeURIComponent(c.id))}><span className="color-disc" style={{background:c.hex||'#d7d9d4'}}/><strong>{c.name}</strong></Link>)}</div></section>}
+function Section({section,bundle,colors,market,fx}:{section:HomeSection;bundle:CatalogBundle;colors:StoreColor[];market?:Market;fx:FxRates|null}){
+ if(section.type==='hero'){const s=section as HomeSection&{eyebrow?:string;heading:string;body?:string;image:Media;mobileImage?:Media;ctas?:Cta[]};return <section className="hero" aria-label="Campaign"><picture>{s.mobileImage&&<source media="(max-width:760px)" srcSet={imageUrl(s.mobileImage.src)}/>}<img src={imageUrl(s.image.src)} alt={s.image.alt}/></picture><div className="hero-copy">{s.eyebrow&&<p className="eyebrow">{s.eyebrow}</p>}<h1>{s.heading}</h1>{s.body&&<p>{s.body}</p>}<div className="hero-actions">{s.ctas?.map((c,i)=><Link className={`btn ${i===0?'btn-dark':'btn-white'}`} href={c.href} key={i}>{c.label}</Link>)}</div></div></section>}
+ if(section.type==='categoryTiles'){const s=section as HomeSection&{heading?:string;tiles:{label:string;image:Media;href:string}[]};return <section className="section-pad" id="categories"><div className="section-head"><div><span className="eyebrow">Find your uniform</span><h2 className="section-title">{s.heading||'Shop by category'}</h2></div></div><div className="category-grid">{s.tiles.map((tile,i)=><Link href={tile.href} className="category-card" key={i}><img src={imageUrl(tile.image.src)} alt={tile.image.alt} loading="lazy"/><span className="category-label">{tile.label}<span aria-hidden="true">↗</span></span></Link>)}</div></section>}
+ if(section.type==='productRail')return <ProductRail section={section as Rail} bundle={bundle} market={market} fx={fx}/>;
+ if(section.type==='colorList')return <ColorList section={section} colors={colors}/>;
+ if(section.type==='split'){const s=section as HomeSection&{heading:string;body:string;image:Media;cta?:Cta};return <section className="split-block"><img className="split-image" src={imageUrl(s.image.src)} alt={s.image.alt} loading="lazy"/><div className="split-copy"><span className="eyebrow">For teams who care</span><h2>{s.heading}</h2><p>{s.body}</p>{s.cta&&<Link className="btn btn-dark" href={s.cta.href}>{s.cta.label}</Link>}</div></section>}
+ if(section.type==='banner'){const s=section as HomeSection&{text:string;link?:Cta};return <section className="brand-band"><h2>{s.text}</h2>{s.link&&<Link className="btn btn-outline" href={s.link.href}>{s.link.label}</Link>}</section>}
+ if(section.type==='richText'){const s=section as HomeSection&{heading?:string;paragraphs:string[]};return <section className="brand-band">{s.heading&&<h2>{s.heading}</h2>}{s.paragraphs.map((p,i)=><p key={i}>{p}</p>)}</section>}
+ return null;
+}
+const empty:CatalogBundle={entries:[],colorGroups:{},bestSellers:[]};
+export function HomeClient({pageId='home'}:{pageId?:string}){const{market,fx}=useMarket();const[content,setContent]=useState<HomeContent|null>(null),[bundle,setBundle]=useState<CatalogBundle>(empty),[colors,setColors]=useState<StoreColor[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState('');useEffect(()=>{let live=true;Promise.all([loadContent(pageId),loadCatalogBundle(),loadColors().catch(()=>[])]).then(([page,catalog,palette])=>{if(live){setContent(page);setBundle(catalog);setColors(palette);setLoading(false)}}).catch(e=>{if(live){setError(e instanceof Error?e.message:'Could not load content');setLoading(false)}});return()=>{live=false}},[pageId]);return <StoreLayout><main className="main">{loading?<div className="page-wrap loading-page">Loading Ciray…</div>:error?<div className="page-wrap result-empty">{error}</div>:!content?<div className="page-wrap result-empty"><h1>Page unavailable</h1><Link href="/shop" className="btn btn-dark">Shop all styles</Link></div>:<>{pageId!=='home'&&<div className="page-wrap"><div className="crumb"><Link href="/">Home</Link> / {content.title}</div><div className="page-heading"><span className="eyebrow">Ciray</span><h1>{content.title}</h1></div></div>}{content.sections.map((section,i)=><Section section={section} bundle={bundle} colors={colors} market={market} fx={fx} key={i}/>)}</>}</main></StoreLayout>}

@@ -1,0 +1,26 @@
+# Firebase App Hosting settings for the Ciray storefront (project ciray-scrub, backend cirayscrubs).
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  # demo: sample catalog, no backend calls. Switch to "firebase" once the real catalog is imported.
+  - variable: NEXT_PUBLIC_CIRAY_MODE
+    value: demo
+    availability: [BUILD, RUNTIME]
+  # Stays off until Stripe test keys, the webhook and allowedReturnOrigins are set (platform/DEPLOY.md).
+  - variable: NEXT_PUBLIC_ENABLE_TEST_CHECKOUT
+    value: "false"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: ciray-scrub
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: ciray-scrub.firebaseapp.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: ciray-scrub.firebasestorage.app
+    availability: [BUILD, RUNTIME]

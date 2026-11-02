@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="410" viewBox="70 50 460 410">
+<defs><clipPath id="star"><path d="M300 72 C290 188 294 220 92 250 C252 242 290 246 300 438 C310 246 348 242 508 250 C306 220 310 188 300 72 Z" /></clipPath></defs>
+<g fill="#512D20" stroke="#512D20" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M300 72 C290 188 294 220 92 250 C252 242 290 246 300 438 C310 246 348 242 508 250 C306 220 310 188 300 72 Z" />
+ <g clip-path="url(#star)" fill="none" stroke="#754B39" stroke-width="2.2" opacity=".9">
+<path d="M-48 430 L392 70" />
+<path d="M-40 430 L400 70" />
+<path d="M-32 430 L408 70" />
+<path d="M-24 430 L416 70" />
+<path d="M-16 430 L424 70" />
+<path d="M-8 430 L432 70" />
+<path d="M0 430 L440 70" />
+<path d="M8 430 L448 70" />
+<path d="M16 430 L456 70" />
+<path d="M24 430 L464 70" />
+<path d="M32 430 L472 70" />
+<path d="M40 430 L480 70" />
+<path d="M48 430 L488 70" />
+<path d="M56 430 L496 70" />
+<path d="M64 430 L504 70" />
+<path d="M72 430 L512 70" />
+<path d="M80 430 L520 70" />
+<path d="M88 430 L528 70" />
+<path d="M96 430 L536 70" />
+<path d="M104 430 L544 70" />
+<path d="M112 430 L552 70" />
+<path d="M120 430 L560 70" />
+<path d="M128 430 L568 70" />
+<path d="M136 430 L576 70" />
+<path d="M144 430 L584 70" />
+<path d="M152 430 L592 70" />
+<path d="M160 430 L600 70" />
+<path d="M168 430 L608 70" />
+<path d="M176 430 L616 70" />
+<path d="M184 430 L624 70" />
+<path d="M192 430 L632 70" />
+<path d="M200 430 L640 70" />
+<path d="M208 430 L648 70" />
+ </g>
+ 
+ <path fill="none" stroke="#512D20" stroke-width="5" d="M286 91 H314 M286 409 H314 M108 236 V264 M492 236 V264" />
+</g>
+</svg>
