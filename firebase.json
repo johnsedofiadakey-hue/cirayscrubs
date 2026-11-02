@@ -1,0 +1,7 @@
+{
+  "apphosting": {
+    "backendId": "cirayscrubs",
+    "rootDir": "/",
+    "ignore": ["node_modules", ".git", ".next", ".env*", "firebase-debug.log", "firebase-debug.*.log", "functions"]
+  }
+}
