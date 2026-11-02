@@ -7,13 +7,20 @@ runConfig:
   memoryMiB: 512
 
 env:
-  # demo: sample catalog, no backend calls. Switch to "firebase" once the real catalog is imported.
+  # firebase: live backend (catalog, admin portal, team inquiries). "demo" shows the sample catalog instead.
   - variable: NEXT_PUBLIC_CIRAY_MODE
-    value: demo
+    value: firebase
     availability: [BUILD, RUNTIME]
   # Stays off until Stripe test keys, the webhook and allowedReturnOrigins are set (platform/DEPLOY.md).
   - variable: NEXT_PUBLIC_ENABLE_TEST_CHECKOUT
     value: "false"
+    availability: [BUILD, RUNTIME]
+  # Firebase web config is public by design (access is enforced by security rules and functions).
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyCgygGiRXCEawW8QfftYBEYzr4lB9S6KJg
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:252568935026:web:4540a7a7b68fb7f97680eb"
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
     value: ciray-scrub
