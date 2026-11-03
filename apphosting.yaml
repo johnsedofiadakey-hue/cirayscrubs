@@ -31,3 +31,8 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
     value: ciray-scrub.firebasestorage.app
     availability: [BUILD, RUNTIME]
+  # reCAPTCHA Enterprise site key for App Check (public). Tokens are sent but not yet enforced:
+  # the backend enforces only when ENFORCE_APP_CHECK=true (platform/DEPLOY.md §7).
+  - variable: NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY
+    value: 6LeiEg4uAAAAAJK_GoH2cicmWeJH2WIFTeLTZq0Z
+    availability: [BUILD, RUNTIME]
