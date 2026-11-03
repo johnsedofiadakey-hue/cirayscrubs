@@ -1,7 +1,6 @@
 import type {Metadata} from 'next';
-import {DM_Sans,Montserrat} from 'next/font/google';
+import {Raleway} from 'next/font/google';
 import './globals.css';
-const dmSans=DM_Sans({subsets:['latin'],display:'swap',variable:'--font-dm-sans'});
-const montserrat=Montserrat({subsets:['latin'],display:'swap',variable:'--font-ciray-display'});
+const raleway=Raleway({subsets:['latin'],display:'swap',variable:'--font-ciray-sans'});
 export const metadata:Metadata={title:{default:'Ciray Scrubs',template:'%s | Ciray Scrubs'},description:'Premium scrubs for every shift.'};
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en" className={`${dmSans.variable} ${montserrat.variable}`}><body>{children}</body></html>}
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en" className={raleway.variable}><body>{children}</body></html>}

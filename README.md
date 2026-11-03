@@ -10,7 +10,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000). `.env.local` currently selects `NEXT_PUBLIC_CIRAY_MODE=demo`: all products, prices, images, collections, four sample markets and exchange rates are synthetic. The bag works locally; payment is disabled. The admin can save demo product details and collections to this browser, while variant upload and publication require Firebase.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). `.env.local` currently selects `NEXT_PUBLIC_CIRAY_MODE=demo`: five FIGS style previews in Black and Navy use source product images and temporary prices, with five sample units per size and length. Four older concept products remain stored for legacy previews but are hidden from the shop. Markets and exchange rates are synthetic. The bag works locally; payment is disabled. The admin can edit demo product details, stock, visibility and collections in this browser; creating variants and uploading images require Firebase. See `../../docs/FIGS-RESELLER-CATALOG-HANDOFF.md` before importing the draft CSV.
 
 For an emulator session, set `NEXT_PUBLIC_CIRAY_MODE=emulator`, fill the Firebase web config in `.env.local`, and run the emulators from `../../platform/`. For a real Firebase project set `NEXT_PUBLIC_CIRAY_MODE=firebase`. No mode silently falls back to demo if Firebase fails. `NEXT_PUBLIC_ENABLE_TEST_CHECKOUT=true` is a separate test payment switch; do not enable it until Stripe test mode and country checks pass.
 
@@ -24,7 +24,7 @@ For an emulator session, set `NEXT_PUBLIC_CIRAY_MODE=emulator`, fill the Firebas
 - `/bag`: server quote, quantity changes, country specific checkout guard.
 - `/checkout/success`: order status callable.
 - `/teams`: inquiry form.
-- `/admin`: role checked product, variant, image, publishing and collection editor.
+- `/admin`: role checked product, variant, image, stock, visibility and collection editor.
 
 The supplied Ciray stitch-star logo is preserved at `public/brand/ciray-stitch-star-logo.svg`; the header and favicon use a derived mark. The default palette uses its warm brown and cream. On a product page, selecting a scrub color updates the photo and storefront accents using the matching `colors/{id}.hex` value. Light colors are darkened for white button text, and the choice persists for the browser tab.
 
@@ -32,7 +32,7 @@ The navigation document is `content/navigation`; a small demo navigation is the 
 
 ## Still required before launch
 
-- Ciray's approved logo, photography, copy, size charts, product variants, stock and actual prices.
+- Supplier-approved product photography for Ciray's use, Ciray copy, size charts, verified variants and stock, and actual selling prices. The supplied Ciray logo is already integrated.
 - Server-rendered page metadata and structured product data for search engines. Collection SEO text renders in-page, but metadata currently uses the site default.
 - Complete admin order fulfillment, market settings and homepage/navigation publishing screens. Collection editorial groups, promo image uploads and sibling links currently require backend/admin tooling beyond the basic editor.
 - Real Firebase staging configuration, staff claims, App Check and payment test mode integration.

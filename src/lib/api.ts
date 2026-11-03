@@ -1,7 +1,7 @@
 import {collection,doc,getDoc,getDocs,query,where} from 'firebase/firestore';
 import {httpsCallable} from 'firebase/functions';
 import {ref,uploadBytes} from 'firebase/storage';
-import {demoCatalogBundle,demoCollectionList,demoColors,demoContentPages,demoEntries,demoFx,demoHome,demoMarkets,demoNavigation,demoProducts,demoQuote,demoVariants,saveDemoCollection,saveDemoProduct} from './demo';
+import {demoCatalogBundle,demoCollectionList,demoColors,demoContentPages,demoEntries,demoFx,demoHome,demoInventoryRows,demoMarkets,demoNavigation,demoProducts,demoQuote,demoVariants,saveDemoCollection,saveDemoProduct,saveDemoStatus,setDemoInventory} from './demo';
 import {isDemo,services} from './firebase-client';
 import type {AdminProductInput,CatalogBundle,CatalogEntry,CartLine,CuratedCollection,FxRates,HomeContent,Market,Navigation,Product,Quote,StoreColor,Variant} from './types';
 export function imageUrl(source:string):string{if(!source||source.startsWith('/')||source.startsWith('https://'))return source;const bucket=process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;if(!bucket)return source;return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(source)}?alt=media`}
@@ -22,6 +22,20 @@ export async function createCheckout(lines:CartLine[],country:string,email?:stri
 export async function getOrderStatus(orderId:string,sessionId?:string){if(isDemo())throw new Error('Order status is unavailable in the design preview');const fn=httpsCallable<{orderId:string;sessionId?:string},Record<string,unknown>>(services().functions,'getOrderStatus');return(await fn({orderId,...(sessionId?{sessionId}:{})})).data}
 export async function adminSaveProduct(input:AdminProductInput){if(isDemo())return saveDemoProduct(input);const fn=httpsCallable<AdminProductInput,{productId:string;created:boolean}>(services().functions,'adminSaveProduct');return(await fn(input)).data}
 export async function adminSaveVariant(input:{productId:string;sku:string;color:string;size:string;length:string;priceCents:number;weightG:number;active:boolean;hsCode?:string;countryOfOrigin?:string}){if(isDemo())throw new Error('Variant saving requires the Firebase emulator');const fn=httpsCallable<typeof input,{sku:string;created:boolean}>(services().functions,'adminSaveVariant');return(await fn(input)).data}
-export async function adminSetProductStatus(productId:string,status:'draft'|'active'|'archived'){if(isDemo())throw new Error('Publishing requires Firebase validation');const fn=httpsCallable<{productId:string;status:string},{productId:string;status:string}>(services().functions,'adminSetProductStatus');return(await fn({productId,status})).data}
+export async function adminSetProductStatus(productId:string,status:'draft'|'active'|'archived'){if(isDemo())return saveDemoStatus(productId,status);const fn=httpsCallable<{productId:string;status:string},{productId:string;status:string}>(services().functions,'adminSetProductStatus');return(await fn({productId,status})).data}
 export async function adminUploadImage(productId:string,file:File,alt:string){if(isDemo())throw new Error('Image upload requires the Firebase emulator');if(!file.type.startsWith('image/'))throw new Error('Choose an image file');const {storage,functions}=services();const clean=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,'-');const path=`catalog/${productId}/${Date.now()}-${clean}`;await uploadBytes(ref(storage,path),file,{contentType:file.type});const fn=httpsCallable<{productId:string;images:{path:string;alt:string}[]},{count:number}>(functions,'adminSaveImages');return(await fn({productId,images:[{path,alt}]})).data}
-export async function adminLoadProducts():Promise<Product[]>{if(isDemo())return demoProducts();const snap=await getDocs(collection(services().db,'products'));return snap.docs.map(d=>d.data() as Product)}
+export async function adminLoadProducts():Promise<Product[]>{if(isDemo())return demoProducts().filter(product=>!product.handle.startsWith('sample-'));const snap=await getDocs(collection(services().db,'products'));return snap.docs.map(d=>d.data() as Product)}
+export interface AdminInventoryRow {sku:string;color:string;size:string;length:string;available:number}
+export async function adminLoadInventory(productId:string):Promise<AdminInventoryRow[]>{
+ if(isDemo()){const product=demoProducts().find(item=>item.handle===productId);return product?demoInventoryRows(product):[]}
+ const {db}=services();
+ const variants=await getDocs(collection(db,'products',productId,'variants'));
+ const rows=await Promise.all(variants.docs.map(async item=>{const variant=item.data() as Variant;const stock=await getDoc(doc(db,'inventory',variant.sku));return{sku:variant.sku,color:variant.color,size:variant.size,length:variant.length,available:Number(stock.data()?.available||0)}}));
+ return rows.sort((a,b)=>a.color.localeCompare(b.color)||a.size.localeCompare(b.size)||a.length.localeCompare(b.length));
+}
+export async function adminSetInventory(sku:string,available:number){
+ if(!Number.isSafeInteger(available)||available<0)throw new Error('Enter a whole stock count of zero or more');
+ if(isDemo())return setDemoInventory(sku,available);
+ const fn=httpsCallable<{sku:string;set:number;note:string},{sku:string;available:number}>(services().functions,'adjustInventory');
+ return(await fn({sku,set:available,note:'Stock edited in Ciray admin'})).data;
+}
