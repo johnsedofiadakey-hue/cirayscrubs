@@ -10,9 +10,9 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000). `.env.local` currently selects `NEXT_PUBLIC_CIRAY_MODE=demo`: five FIGS style previews in Black and Navy use source product images and temporary prices, with five sample units per size and length. Four older concept products remain stored for legacy previews but are hidden from the shop. Markets and exchange rates are synthetic. The bag works locally; payment is disabled. The admin can edit demo product details, stock, visibility and collections in this browser; creating variants and uploading images require Firebase. See `../../docs/FIGS-RESELLER-CATALOG-HANDOFF.md` before importing the draft CSV.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). The default runtime is Firebase mode and reads the same catalog and content as the hosted store. The live catalog has five FIGS styles in Black and Navy, with 190 variant records initially set to five units each. Inventory edits in `/admin` call the backend and change Firebase stock. The initial catalog sheet is `../../data/ciray-initial-catalog.csv`. Payment remains disabled until checkout setup and market checks are complete.
 
-For an emulator session, set `NEXT_PUBLIC_CIRAY_MODE=emulator`, fill the Firebase web config in `.env.local`, and run the emulators from `../../platform/`. For a real Firebase project set `NEXT_PUBLIC_CIRAY_MODE=firebase`. No mode silently falls back to demo if Firebase fails. `NEXT_PUBLIC_ENABLE_TEST_CHECKOUT=true` is a separate test payment switch; do not enable it until Stripe test mode and country checks pass.
+For an emulator session, set `NEXT_PUBLIC_CIRAY_MODE=emulator` and run the emulators from `../../platform/`. Fill the Firebase web config in `.env.local` before local development. `NEXT_PUBLIC_ENABLE_TEST_CHECKOUT=true` is a separate test payment switch; enable it only after Stripe test mode and country checks pass.
 
 ## Implemented routes
 
